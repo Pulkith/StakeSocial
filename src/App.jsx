@@ -1,35 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import BottomNav from './components/BottomNav';
+import ChatsList from './components/ChatsList';
+import ChatView from './components/ChatView';
+import AllBetsView from './components/AllBetsView';
+import MyBetsView from './components/MyBetsView';
+import ProfileView from './components/ProfileView';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentTab, setCurrentTab] = useState('chats');
+  const [currentView, setCurrentView] = useState('main'); // 'main', 'chat', 'allBets'
+  const [selectedChatId, setSelectedChatId] = useState(null);
+
+  const handleChatSelect = (chatId) => {
+    setSelectedChatId(chatId);
+    setCurrentView('chat');
+  };
+
+  const handleBack = () => {
+    setCurrentView('main');
+    setSelectedChatId(null);
+  };
+
+  const handleViewAllBets = () => {
+    setCurrentView('allBets');
+  };
+
+  const renderContent = () => {
+    // Sub-views (chat view, all bets view)
+    if (currentView === 'chat' && selectedChatId) {
+      return (
+        <ChatView
+          chatId={selectedChatId}
+          onBack={handleBack}
+          onViewAllBets={handleViewAllBets}
+        />
+      );
+    }
+
+    if (currentView === 'allBets') {
+      return <AllBetsView chatId={selectedChatId} onBack={handleBack} />;
+    }
+
+    // Main tab views
+    switch (currentTab) {
+      case 'chats':
+        return <ChatsList onChatSelect={handleChatSelect} />;
+      case 'bets':
+        return <MyBetsView />;
+      case 'profile':
+        return <ProfileView />;
+      default:
+        return <ChatsList onChatSelect={handleChatSelect} />;
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="h-screen bg-gray-950 text-white">
+      <main className="h-full">
+        {renderContent()}
+      </main>
+      <BottomNav currentTab={currentTab} onTabChange={(tab) => {
+        setCurrentTab(tab);
+        setCurrentView('main');
+        setSelectedChatId(null);
+      }} />
+    </div>
+  );
 }
 
-export default App
+export default App;
